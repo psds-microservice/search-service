@@ -84,9 +84,13 @@ func (x *SearchRequest) GetLimit() int32 {
 
 type IndexTicketRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Subject       string                 `protobuf:"bytes,2,opt,name=subject,proto3" json:"subject,omitempty"`
-	Body          string                 `protobuf:"bytes,3,opt,name=body,proto3" json:"body,omitempty"`
+	TicketId      int64                  `protobuf:"varint,1,opt,name=ticket_id,json=ticketId,proto3" json:"ticket_id,omitempty"`
+	SessionId     string                 `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	ClientId      string                 `protobuf:"bytes,3,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	OperatorId    string                 `protobuf:"bytes,4,opt,name=operator_id,json=operatorId,proto3" json:"operator_id,omitempty"`
+	Subject       string                 `protobuf:"bytes,5,opt,name=subject,proto3" json:"subject,omitempty"`
+	Notes         string                 `protobuf:"bytes,6,opt,name=notes,proto3" json:"notes,omitempty"`
+	Status        string                 `protobuf:"bytes,7,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -121,9 +125,30 @@ func (*IndexTicketRequest) Descriptor() ([]byte, []int) {
 	return file_search_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *IndexTicketRequest) GetId() string {
+func (x *IndexTicketRequest) GetTicketId() int64 {
 	if x != nil {
-		return x.Id
+		return x.TicketId
+	}
+	return 0
+}
+
+func (x *IndexTicketRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *IndexTicketRequest) GetClientId() string {
+	if x != nil {
+		return x.ClientId
+	}
+	return ""
+}
+
+func (x *IndexTicketRequest) GetOperatorId() string {
+	if x != nil {
+		return x.OperatorId
 	}
 	return ""
 }
@@ -135,17 +160,26 @@ func (x *IndexTicketRequest) GetSubject() string {
 	return ""
 }
 
-func (x *IndexTicketRequest) GetBody() string {
+func (x *IndexTicketRequest) GetNotes() string {
 	if x != nil {
-		return x.Body
+		return x.Notes
+	}
+	return ""
+}
+
+func (x *IndexTicketRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
 	}
 	return ""
 }
 
 type IndexSessionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ExternalId    string                 `protobuf:"bytes,2,opt,name=external_id,json=externalId,proto3" json:"external_id,omitempty"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	ClientId      string                 `protobuf:"bytes,2,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	Pin           string                 `protobuf:"bytes,3,opt,name=pin,proto3" json:"pin,omitempty"`
+	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -180,16 +214,30 @@ func (*IndexSessionRequest) Descriptor() ([]byte, []int) {
 	return file_search_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *IndexSessionRequest) GetId() string {
+func (x *IndexSessionRequest) GetSessionId() string {
 	if x != nil {
-		return x.Id
+		return x.SessionId
 	}
 	return ""
 }
 
-func (x *IndexSessionRequest) GetExternalId() string {
+func (x *IndexSessionRequest) GetClientId() string {
 	if x != nil {
-		return x.ExternalId
+		return x.ClientId
+	}
+	return ""
+}
+
+func (x *IndexSessionRequest) GetPin() string {
+	if x != nil {
+		return x.Pin
+	}
+	return ""
+}
+
+func (x *IndexSessionRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
 	}
 	return ""
 }
@@ -198,6 +246,8 @@ type IndexOperatorRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	DisplayName   string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	Region        string                 `protobuf:"bytes,3,opt,name=region,proto3" json:"region,omitempty"`
+	Role          string                 `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -246,9 +296,25 @@ func (x *IndexOperatorRequest) GetDisplayName() string {
 	return ""
 }
 
+func (x *IndexOperatorRequest) GetRegion() string {
+	if x != nil {
+		return x.Region
+	}
+	return ""
+}
+
+func (x *IndexOperatorRequest) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
 type SearchResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Hits          []*SearchHit           `protobuf:"bytes,1,rep,name=hits,proto3" json:"hits,omitempty"`
+	Tickets       []*TicketHit           `protobuf:"bytes,1,rep,name=tickets,proto3" json:"tickets,omitempty"`
+	Sessions      []*SessionHit          `protobuf:"bytes,2,rep,name=sessions,proto3" json:"sessions,omitempty"`
+	Operators     []*OperatorHit         `protobuf:"bytes,3,rep,name=operators,proto3" json:"operators,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -283,36 +349,51 @@ func (*SearchResponse) Descriptor() ([]byte, []int) {
 	return file_search_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *SearchResponse) GetHits() []*SearchHit {
+func (x *SearchResponse) GetTickets() []*TicketHit {
 	if x != nil {
-		return x.Hits
+		return x.Tickets
 	}
 	return nil
 }
 
-type SearchHit struct {
+func (x *SearchResponse) GetSessions() []*SessionHit {
+	if x != nil {
+		return x.Sessions
+	}
+	return nil
+}
+
+func (x *SearchResponse) GetOperators() []*OperatorHit {
+	if x != nil {
+		return x.Operators
+	}
+	return nil
+}
+
+type TicketHit struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
-	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	TicketId      int64                  `protobuf:"varint,1,opt,name=ticket_id,json=ticketId,proto3" json:"ticket_id,omitempty"`
+	SessionId     string                 `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Subject       string                 `protobuf:"bytes,3,opt,name=subject,proto3" json:"subject,omitempty"`
+	Snippet       string                 `protobuf:"bytes,4,opt,name=snippet,proto3" json:"snippet,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *SearchHit) Reset() {
-	*x = SearchHit{}
+func (x *TicketHit) Reset() {
+	*x = TicketHit{}
 	mi := &file_search_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SearchHit) String() string {
+func (x *TicketHit) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SearchHit) ProtoMessage() {}
+func (*TicketHit) ProtoMessage() {}
 
-func (x *SearchHit) ProtoReflect() protoreflect.Message {
+func (x *TicketHit) ProtoReflect() protoreflect.Message {
 	mi := &file_search_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -324,28 +405,171 @@ func (x *SearchHit) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SearchHit.ProtoReflect.Descriptor instead.
-func (*SearchHit) Descriptor() ([]byte, []int) {
+// Deprecated: Use TicketHit.ProtoReflect.Descriptor instead.
+func (*TicketHit) Descriptor() ([]byte, []int) {
 	return file_search_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *SearchHit) GetId() string {
+func (x *TicketHit) GetTicketId() int64 {
 	if x != nil {
-		return x.Id
+		return x.TicketId
+	}
+	return 0
+}
+
+func (x *TicketHit) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
 	}
 	return ""
 }
 
-func (x *SearchHit) GetType() string {
+func (x *TicketHit) GetSubject() string {
 	if x != nil {
-		return x.Type
+		return x.Subject
 	}
 	return ""
 }
 
-func (x *SearchHit) GetTitle() string {
+func (x *TicketHit) GetSnippet() string {
 	if x != nil {
-		return x.Title
+		return x.Snippet
+	}
+	return ""
+}
+
+type SessionHit struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Pin           string                 `protobuf:"bytes,2,opt,name=pin,proto3" json:"pin,omitempty"`
+	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
+	Snippet       string                 `protobuf:"bytes,4,opt,name=snippet,proto3" json:"snippet,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SessionHit) Reset() {
+	*x = SessionHit{}
+	mi := &file_search_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SessionHit) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SessionHit) ProtoMessage() {}
+
+func (x *SessionHit) ProtoReflect() protoreflect.Message {
+	mi := &file_search_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SessionHit.ProtoReflect.Descriptor instead.
+func (*SessionHit) Descriptor() ([]byte, []int) {
+	return file_search_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *SessionHit) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *SessionHit) GetPin() string {
+	if x != nil {
+		return x.Pin
+	}
+	return ""
+}
+
+func (x *SessionHit) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *SessionHit) GetSnippet() string {
+	if x != nil {
+		return x.Snippet
+	}
+	return ""
+}
+
+type OperatorHit struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	DisplayName   string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	Region        string                 `protobuf:"bytes,3,opt,name=region,proto3" json:"region,omitempty"`
+	Snippet       string                 `protobuf:"bytes,4,opt,name=snippet,proto3" json:"snippet,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *OperatorHit) Reset() {
+	*x = OperatorHit{}
+	mi := &file_search_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OperatorHit) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OperatorHit) ProtoMessage() {}
+
+func (x *OperatorHit) ProtoReflect() protoreflect.Message {
+	mi := &file_search_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OperatorHit.ProtoReflect.Descriptor instead.
+func (*OperatorHit) Descriptor() ([]byte, []int) {
+	return file_search_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *OperatorHit) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *OperatorHit) GetDisplayName() string {
+	if x != nil {
+		return x.DisplayName
+	}
+	return ""
+}
+
+func (x *OperatorHit) GetRegion() string {
+	if x != nil {
+		return x.Region
+	}
+	return ""
+}
+
+func (x *OperatorHit) GetSnippet() string {
+	if x != nil {
+		return x.Snippet
 	}
 	return ""
 }
@@ -359,7 +583,7 @@ type IndexResponse struct {
 
 func (x *IndexResponse) Reset() {
 	*x = IndexResponse{}
-	mi := &file_search_proto_msgTypes[6]
+	mi := &file_search_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -371,7 +595,7 @@ func (x *IndexResponse) String() string {
 func (*IndexResponse) ProtoMessage() {}
 
 func (x *IndexResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_search_proto_msgTypes[6]
+	mi := &file_search_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -384,7 +608,7 @@ func (x *IndexResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IndexResponse.ProtoReflect.Descriptor instead.
 func (*IndexResponse) Descriptor() ([]byte, []int) {
-	return file_search_proto_rawDescGZIP(), []int{6}
+	return file_search_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *IndexResponse) GetOk() bool {
@@ -402,24 +626,50 @@ const file_search_proto_rawDesc = "" +
 	"\rSearchRequest\x12\f\n" +
 	"\x01q\x18\x01 \x01(\tR\x01q\x12\x12\n" +
 	"\x04type\x18\x02 \x01(\tR\x04type\x12\x14\n" +
-	"\x05limit\x18\x03 \x01(\x05R\x05limit\"R\n" +
-	"\x12IndexTicketRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
-	"\asubject\x18\x02 \x01(\tR\asubject\x12\x12\n" +
-	"\x04body\x18\x03 \x01(\tR\x04body\"F\n" +
-	"\x13IndexSessionRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1f\n" +
-	"\vexternal_id\x18\x02 \x01(\tR\n" +
-	"externalId\"R\n" +
+	"\x05limit\x18\x03 \x01(\x05R\x05limit\"\xd6\x01\n" +
+	"\x12IndexTicketRequest\x12\x1b\n" +
+	"\tticket_id\x18\x01 \x01(\x03R\bticketId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x02 \x01(\tR\tsessionId\x12\x1b\n" +
+	"\tclient_id\x18\x03 \x01(\tR\bclientId\x12\x1f\n" +
+	"\voperator_id\x18\x04 \x01(\tR\n" +
+	"operatorId\x12\x18\n" +
+	"\asubject\x18\x05 \x01(\tR\asubject\x12\x14\n" +
+	"\x05notes\x18\x06 \x01(\tR\x05notes\x12\x16\n" +
+	"\x06status\x18\a \x01(\tR\x06status\"{\n" +
+	"\x13IndexSessionRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x1b\n" +
+	"\tclient_id\x18\x02 \x01(\tR\bclientId\x12\x10\n" +
+	"\x03pin\x18\x03 \x01(\tR\x03pin\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\tR\x06status\"~\n" +
 	"\x14IndexOperatorRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12!\n" +
-	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\"?\n" +
-	"\x0eSearchResponse\x12-\n" +
-	"\x04hits\x18\x01 \x03(\v2\x19.search_service.SearchHitR\x04hits\"E\n" +
-	"\tSearchHit\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04type\x18\x02 \x01(\tR\x04type\x12\x14\n" +
-	"\x05title\x18\x03 \x01(\tR\x05title\"\x1f\n" +
+	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12\x16\n" +
+	"\x06region\x18\x03 \x01(\tR\x06region\x12\x12\n" +
+	"\x04role\x18\x04 \x01(\tR\x04role\"\xb8\x01\n" +
+	"\x0eSearchResponse\x123\n" +
+	"\atickets\x18\x01 \x03(\v2\x19.search_service.TicketHitR\atickets\x126\n" +
+	"\bsessions\x18\x02 \x03(\v2\x1a.search_service.SessionHitR\bsessions\x129\n" +
+	"\toperators\x18\x03 \x03(\v2\x1b.search_service.OperatorHitR\toperators\"{\n" +
+	"\tTicketHit\x12\x1b\n" +
+	"\tticket_id\x18\x01 \x01(\x03R\bticketId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x02 \x01(\tR\tsessionId\x12\x18\n" +
+	"\asubject\x18\x03 \x01(\tR\asubject\x12\x18\n" +
+	"\asnippet\x18\x04 \x01(\tR\asnippet\"o\n" +
+	"\n" +
+	"SessionHit\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x10\n" +
+	"\x03pin\x18\x02 \x01(\tR\x03pin\x12\x16\n" +
+	"\x06status\x18\x03 \x01(\tR\x06status\x12\x18\n" +
+	"\asnippet\x18\x04 \x01(\tR\asnippet\"{\n" +
+	"\vOperatorHit\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12!\n" +
+	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12\x16\n" +
+	"\x06region\x18\x03 \x01(\tR\x06region\x12\x18\n" +
+	"\asnippet\x18\x04 \x01(\tR\asnippet\"\x1f\n" +
 	"\rIndexResponse\x12\x0e\n" +
 	"\x02ok\x18\x01 \x01(\bR\x02ok2\xcb\x03\n" +
 	"\rSearchService\x12X\n" +
@@ -440,31 +690,35 @@ func file_search_proto_rawDescGZIP() []byte {
 	return file_search_proto_rawDescData
 }
 
-var file_search_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_search_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_search_proto_goTypes = []any{
 	(*SearchRequest)(nil),        // 0: search_service.SearchRequest
 	(*IndexTicketRequest)(nil),   // 1: search_service.IndexTicketRequest
 	(*IndexSessionRequest)(nil),  // 2: search_service.IndexSessionRequest
 	(*IndexOperatorRequest)(nil), // 3: search_service.IndexOperatorRequest
 	(*SearchResponse)(nil),       // 4: search_service.SearchResponse
-	(*SearchHit)(nil),            // 5: search_service.SearchHit
-	(*IndexResponse)(nil),        // 6: search_service.IndexResponse
+	(*TicketHit)(nil),            // 5: search_service.TicketHit
+	(*SessionHit)(nil),           // 6: search_service.SessionHit
+	(*OperatorHit)(nil),          // 7: search_service.OperatorHit
+	(*IndexResponse)(nil),        // 8: search_service.IndexResponse
 }
 var file_search_proto_depIdxs = []int32{
-	5, // 0: search_service.SearchResponse.hits:type_name -> search_service.SearchHit
-	0, // 1: search_service.SearchService.Search:input_type -> search_service.SearchRequest
-	1, // 2: search_service.SearchService.IndexTicket:input_type -> search_service.IndexTicketRequest
-	2, // 3: search_service.SearchService.IndexSession:input_type -> search_service.IndexSessionRequest
-	3, // 4: search_service.SearchService.IndexOperator:input_type -> search_service.IndexOperatorRequest
-	4, // 5: search_service.SearchService.Search:output_type -> search_service.SearchResponse
-	6, // 6: search_service.SearchService.IndexTicket:output_type -> search_service.IndexResponse
-	6, // 7: search_service.SearchService.IndexSession:output_type -> search_service.IndexResponse
-	6, // 8: search_service.SearchService.IndexOperator:output_type -> search_service.IndexResponse
-	5, // [5:9] is the sub-list for method output_type
-	1, // [1:5] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	5, // 0: search_service.SearchResponse.tickets:type_name -> search_service.TicketHit
+	6, // 1: search_service.SearchResponse.sessions:type_name -> search_service.SessionHit
+	7, // 2: search_service.SearchResponse.operators:type_name -> search_service.OperatorHit
+	0, // 3: search_service.SearchService.Search:input_type -> search_service.SearchRequest
+	1, // 4: search_service.SearchService.IndexTicket:input_type -> search_service.IndexTicketRequest
+	2, // 5: search_service.SearchService.IndexSession:input_type -> search_service.IndexSessionRequest
+	3, // 6: search_service.SearchService.IndexOperator:input_type -> search_service.IndexOperatorRequest
+	4, // 7: search_service.SearchService.Search:output_type -> search_service.SearchResponse
+	8, // 8: search_service.SearchService.IndexTicket:output_type -> search_service.IndexResponse
+	8, // 9: search_service.SearchService.IndexSession:output_type -> search_service.IndexResponse
+	8, // 10: search_service.SearchService.IndexOperator:output_type -> search_service.IndexResponse
+	7, // [7:11] is the sub-list for method output_type
+	3, // [3:7] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_search_proto_init() }
@@ -478,7 +732,7 @@ func file_search_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_search_proto_rawDesc), len(file_search_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

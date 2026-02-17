@@ -14,10 +14,63 @@ service SearchService {
     option (google.api.http) = { post: "/search/index/operator"; body: "*" }; }
 }
 
-message SearchRequest { string q = 1; string type = 2; int32 limit = 3; }
-message IndexTicketRequest { string id = 1; string subject = 2; string body = 3; }
-message IndexSessionRequest { string id = 1; string external_id = 2; }
-message IndexOperatorRequest { string user_id = 1; string display_name = 2; }
-message SearchResponse { repeated SearchHit hits = 1; }
-message SearchHit { string id = 1; string type = 2; string title = 3; }
-message IndexResponse { bool ok = 1; }
+message SearchRequest {
+  string q = 1;
+  string type = 2;
+  int32 limit = 3;
+}
+
+message IndexTicketRequest {
+  int64 ticket_id = 1;
+  string session_id = 2;
+  string client_id = 3;
+  string operator_id = 4;
+  string subject = 5;
+  string notes = 6;
+  string status = 7;
+}
+
+message IndexSessionRequest {
+  string session_id = 1;
+  string client_id = 2;
+  string pin = 3;
+  string status = 4;
+}
+
+message IndexOperatorRequest {
+  string user_id = 1;
+  string display_name = 2;
+  string region = 3;
+  string role = 4;
+}
+
+message SearchResponse {
+  repeated TicketHit tickets = 1;
+  repeated SessionHit sessions = 2;
+  repeated OperatorHit operators = 3;
+}
+
+message TicketHit {
+  int64 ticket_id = 1;
+  string session_id = 2;
+  string subject = 3;
+  string snippet = 4;
+}
+
+message SessionHit {
+  string session_id = 1;
+  string pin = 2;
+  string status = 3;
+  string snippet = 4;
+}
+
+message OperatorHit {
+  string user_id = 1;
+  string display_name = 2;
+  string region = 3;
+  string snippet = 4;
+}
+
+message IndexResponse {
+  bool ok = 1;
+}

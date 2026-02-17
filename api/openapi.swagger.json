@@ -193,6 +193,12 @@
         },
         "displayName": {
           "type": "string"
+        },
+        "region": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
         }
       }
     },
@@ -207,10 +213,16 @@
     "search_serviceIndexSessionRequest": {
       "type": "object",
       "properties": {
-        "id": {
+        "sessionId": {
           "type": "string"
         },
-        "externalId": {
+        "clientId": {
+          "type": "string"
+        },
+        "pin": {
+          "type": "string"
+        },
+        "status": {
           "type": "string"
         }
       }
@@ -218,27 +230,43 @@
     "search_serviceIndexTicketRequest": {
       "type": "object",
       "properties": {
-        "id": {
+        "ticketId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "sessionId": {
+          "type": "string"
+        },
+        "clientId": {
+          "type": "string"
+        },
+        "operatorId": {
           "type": "string"
         },
         "subject": {
           "type": "string"
         },
-        "body": {
+        "notes": {
+          "type": "string"
+        },
+        "status": {
           "type": "string"
         }
       }
     },
-    "search_serviceSearchHit": {
+    "search_serviceOperatorHit": {
       "type": "object",
       "properties": {
-        "id": {
+        "userId": {
           "type": "string"
         },
-        "type": {
+        "displayName": {
           "type": "string"
         },
-        "title": {
+        "region": {
+          "type": "string"
+        },
+        "snippet": {
           "type": "string"
         }
       }
@@ -246,12 +274,61 @@
     "search_serviceSearchResponse": {
       "type": "object",
       "properties": {
-        "hits": {
+        "tickets": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/search_serviceSearchHit"
+            "$ref": "#/definitions/search_serviceTicketHit"
           }
+        },
+        "sessions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/search_serviceSessionHit"
+          }
+        },
+        "operators": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/search_serviceOperatorHit"
+          }
+        }
+      }
+    },
+    "search_serviceSessionHit": {
+      "type": "object",
+      "properties": {
+        "sessionId": {
+          "type": "string"
+        },
+        "pin": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "snippet": {
+          "type": "string"
+        }
+      }
+    },
+    "search_serviceTicketHit": {
+      "type": "object",
+      "properties": {
+        "ticketId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "sessionId": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "snippet": {
+          "type": "string"
         }
       }
     }

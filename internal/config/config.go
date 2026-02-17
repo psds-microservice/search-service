@@ -8,6 +8,7 @@ import (
 type Config struct {
 	AppHost  string
 	HTTPPort string
+	GRPCPort string
 	LogLevel string
 
 	Elasticsearch struct {
@@ -19,6 +20,7 @@ func Load() (*Config, error) {
 	cfg := &Config{
 		AppHost:  getEnv("APP_HOST", "0.0.0.0"),
 		HTTPPort: firstEnv("APP_PORT", "HTTP_PORT", "8096"),
+		GRPCPort: firstEnv("GRPC_PORT", "METRICS_PORT", "9096"),
 		LogLevel: getEnv("LOG_LEVEL", "info"),
 	}
 	cfg.Elasticsearch.URL = getEnv("ELASTICSEARCH_URL", "http://localhost:9200")
@@ -35,7 +37,6 @@ func (c *Config) Validate() error {
 func (c *Config) AppEnv() string {
 	return getEnv("APP_ENV", "development")
 }
-
 
 func firstEnv(keysAndDef ...string) string {
 	if len(keysAndDef) == 0 {
