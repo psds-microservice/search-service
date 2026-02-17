@@ -8,6 +8,14 @@ import (
 	"github.com/psds-microservice/search-service/internal/elasticsearch"
 )
 
+// SearchServicer — интерфейс для gRPC Deps (Dependency Inversion).
+type SearchServicer interface {
+	Search(ctx context.Context, q string, typeFilter string, limit int) (*SearchResult, error)
+	IndexTicket(ctx context.Context, in *IndexTicketInput) error
+	IndexSession(ctx context.Context, in *IndexSessionInput) error
+	IndexOperator(ctx context.Context, in *IndexOperatorInput) error
+}
+
 const (
 	indexTickets   = "tickets"
 	indexSessions  = "sessions"
