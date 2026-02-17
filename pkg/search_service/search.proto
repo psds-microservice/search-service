@@ -1,0 +1,23 @@
+syntax = "proto3";
+package search_service;
+option go_package = "github.com/psds-microservice/search-service/pkg/gen/search_service;search_service";
+import "google/api/annotations.proto";
+
+service SearchService {
+  rpc Search (SearchRequest) returns (SearchResponse) {
+    option (google.api.http) = { get: "/search" }; }
+  rpc IndexTicket (IndexTicketRequest) returns (IndexResponse) {
+    option (google.api.http) = { post: "/search/index/ticket"; body: "*" }; }
+  rpc IndexSession (IndexSessionRequest) returns (IndexResponse) {
+    option (google.api.http) = { post: "/search/index/session"; body: "*" }; }
+  rpc IndexOperator (IndexOperatorRequest) returns (IndexResponse) {
+    option (google.api.http) = { post: "/search/index/operator"; body: "*" }; }
+}
+
+message SearchRequest { string q = 1; string type = 2; int32 limit = 3; }
+message IndexTicketRequest { string id = 1; string subject = 2; string body = 3; }
+message IndexSessionRequest { string id = 1; string external_id = 2; }
+message IndexOperatorRequest { string user_id = 1; string display_name = 2; }
+message SearchResponse { repeated SearchHit hits = 1; }
+message SearchHit { string id = 1; string type = 2; string title = 3; }
+message IndexResponse { bool ok = 1; }
