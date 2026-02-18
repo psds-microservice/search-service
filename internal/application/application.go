@@ -21,6 +21,7 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // serveOpenAPISpec отдаёт api/openapi.json или api/openapi.swagger.json (из proto: make proto-openapi).
@@ -83,7 +84,14 @@ func NewAPI(cfg *config.Config) (*API, error) {
 	search_service.RegisterSearchServiceServer(grpcSrv, grpcImpl)
 	reflection.Register(grpcSrv)
 
-	gatewayMux := runtime.NewServeMux()
+	// EmitUnpopulated: true — чтобы в JSON всегда были total и hasMore (иначе при 0/false они опускаются)
+	gatewayMux := runtime.NewServeMux(
+		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
+			MarshalOptions: protojson.MarshalOptions{
+				EmitUnpopulated: true,
+			},
+		}),
+	)
 	if err := search_service.RegisterSearchServiceHandlerServer(context.Background(), gatewayMux, grpcImpl); err != nil {
 		return nil, fmt.Errorf("register grpc-gateway: %w", err)
 	}
