@@ -52,9 +52,10 @@ func (c *Client) IndexDocument(ctx context.Context, index, id string, doc interf
 }
 
 // Search performs a search query
-func (c *Client) Search(ctx context.Context, index string, query map[string]interface{}, limit int) (*SearchResponse, error) {
+func (c *Client) Search(ctx context.Context, index string, query map[string]interface{}, limit int, offset int) (*SearchResponse, error) {
 	searchQuery := map[string]interface{}{
-		"size": limit,
+		"size":  limit,
+		"from":  offset,
 		"query": query,
 	}
 
@@ -92,7 +93,7 @@ func (c *Client) Search(ctx context.Context, index string, query map[string]inte
 // EnsureIndex creates an index if it doesn't exist
 func (c *Client) EnsureIndex(ctx context.Context, index string, mapping map[string]interface{}) error {
 	url := fmt.Sprintf("%s/%s", c.baseURL, index)
-	
+
 	// Check if index exists
 	req, err := http.NewRequestWithContext(ctx, "HEAD", url, nil)
 	if err != nil {
@@ -140,6 +141,9 @@ func (c *Client) EnsureIndex(ctx context.Context, index string, mapping map[stri
 // SearchResponse represents Elasticsearch search response
 type SearchResponse struct {
 	Hits struct {
+		Total struct {
+			Value int64 `json:"value"`
+		} `json:"total"`
 		Hits []struct {
 			ID     string                 `json:"_id"`
 			Source map[string]interface{} `json:"_source"`
