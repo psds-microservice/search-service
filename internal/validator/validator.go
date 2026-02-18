@@ -14,20 +14,6 @@ func New() *Validator {
 	return &Validator{}
 }
 
-// ValidateSearchQuery validates search query parameters
-func (v *Validator) ValidateSearchQuery(q string, typeFilter string, limit int) error {
-	if limit < 0 {
-		return errors.New("validation: limit must be non-negative")
-	}
-	if limit > 100 {
-		return errors.New("validation: limit must not exceed 100")
-	}
-	if typeFilter != "" && typeFilter != "tickets" && typeFilter != "sessions" && typeFilter != "operators" {
-		return errors.New("validation: type must be one of: tickets, sessions, operators, or empty for all")
-	}
-	return nil
-}
-
 // ValidateIndexTicketInput validates IndexTicketInput
 func (v *Validator) ValidateIndexTicketInput(ticketID int64, sessionID string) error {
 	var errs []string
@@ -61,6 +47,25 @@ func (v *Validator) ValidateIndexOperatorInput(userID string) error {
 	}
 	if _, err := uuid.Parse(userID); err != nil {
 		return errors.New("validation: user_id must be a valid UUID")
+	}
+	return nil
+}
+
+// ValidateSearchLimit validates limit parameter (common for all search requests)
+func (v *Validator) ValidateSearchLimit(limit int) error {
+	if limit < 0 {
+		return errors.New("validation: limit must be non-negative")
+	}
+	if limit > 100 {
+		return errors.New("validation: limit must not exceed 100")
+	}
+	return nil
+}
+
+// ValidateSearchOffset validates offset parameter for pagination
+func (v *Validator) ValidateSearchOffset(offset int) error {
+	if offset < 0 {
+		return errors.New("validation: offset must be non-negative")
 	}
 	return nil
 }

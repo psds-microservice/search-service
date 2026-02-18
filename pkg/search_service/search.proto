@@ -4,8 +4,12 @@ option go_package = "github.com/psds-microservice/search-service/pkg/gen/search_
 import "google/api/annotations.proto";
 
 service SearchService {
-  rpc Search (SearchRequest) returns (SearchResponse) {
-    option (google.api.http) = { get: "/search" }; }
+  rpc SearchTickets (SearchTicketsRequest) returns (SearchTicketsResponse) {
+    option (google.api.http) = { get: "/search/tickets" }; }
+  rpc SearchSessions (SearchSessionsRequest) returns (SearchSessionsResponse) {
+    option (google.api.http) = { get: "/search/sessions" }; }
+  rpc SearchOperators (SearchOperatorsRequest) returns (SearchOperatorsResponse) {
+    option (google.api.http) = { get: "/search/operators" }; }
   rpc IndexTicket (IndexTicketRequest) returns (IndexResponse) {
     option (google.api.http) = { post: "/search/index/ticket"; body: "*" }; }
   rpc IndexSession (IndexSessionRequest) returns (IndexResponse) {
@@ -14,10 +18,29 @@ service SearchService {
     option (google.api.http) = { post: "/search/index/operator"; body: "*" }; }
 }
 
-message SearchRequest {
-  string q = 1;
-  string type = 2;
-  int32 limit = 3;
+message SearchTicketsRequest {
+  string status = 1;      // опционально: фильтр по status
+  string session_id = 2;  // опционально: фильтр по session_id
+  string client_id = 3;   // опционально: фильтр по client_id
+  string operator_id = 4; // опционально: фильтр по operator_id
+  int32 limit = 5;        // опционально: лимит результатов (по умолчанию 20, максимум 100)
+  int32 offset = 6;       // опционально: смещение для пагинации (по умолчанию 0)
+}
+
+message SearchSessionsRequest {
+  string status = 1;     // опционально: фильтр по status (waiting, active, finished)
+  string client_id = 2;  // опционально: фильтр по client_id
+  string pin = 3;        // опционально: фильтр по pin
+  int32 limit = 4;       // опционально: лимит результатов (по умолчанию 20, максимум 100)
+  int32 offset = 5;      // опционально: смещение для пагинации (по умолчанию 0)
+}
+
+message SearchOperatorsRequest {
+  string region = 1;       // опционально: фильтр по region
+  string role = 2;          // опционально: фильтр по role (operator, supervisor, admin)
+  string display_name = 3;  // опционально: фильтр по display_name (точное совпадение)
+  int32 limit = 4;          // опционально: лимит результатов (по умолчанию 20, максимум 100)
+  int32 offset = 5;         // опционально: смещение для пагинации (по умолчанию 0)
 }
 
 message IndexTicketRequest {
@@ -44,10 +67,22 @@ message IndexOperatorRequest {
   string role = 4;
 }
 
-message SearchResponse {
+message SearchTicketsResponse {
   repeated TicketHit tickets = 1;
-  repeated SessionHit sessions = 2;
-  repeated OperatorHit operators = 3;
+  int64 total = 2;        // общее количество результатов
+  bool has_more = 3;      // есть ли ещё результаты
+}
+
+message SearchSessionsResponse {
+  repeated SessionHit sessions = 1;
+  int64 total = 2;        // общее количество результатов
+  bool has_more = 3;      // есть ли ещё результаты
+}
+
+message SearchOperatorsResponse {
+  repeated OperatorHit operators = 1;
+  int64 total = 2;        // общее количество результатов
+  bool has_more = 3;      // есть ли ещё результаты
 }
 
 message TicketHit {

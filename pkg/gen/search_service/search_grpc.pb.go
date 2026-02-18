@@ -19,17 +19,21 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	SearchService_Search_FullMethodName        = "/search_service.SearchService/Search"
-	SearchService_IndexTicket_FullMethodName   = "/search_service.SearchService/IndexTicket"
-	SearchService_IndexSession_FullMethodName  = "/search_service.SearchService/IndexSession"
-	SearchService_IndexOperator_FullMethodName = "/search_service.SearchService/IndexOperator"
+	SearchService_SearchTickets_FullMethodName   = "/search_service.SearchService/SearchTickets"
+	SearchService_SearchSessions_FullMethodName  = "/search_service.SearchService/SearchSessions"
+	SearchService_SearchOperators_FullMethodName = "/search_service.SearchService/SearchOperators"
+	SearchService_IndexTicket_FullMethodName     = "/search_service.SearchService/IndexTicket"
+	SearchService_IndexSession_FullMethodName    = "/search_service.SearchService/IndexSession"
+	SearchService_IndexOperator_FullMethodName   = "/search_service.SearchService/IndexOperator"
 )
 
 // SearchServiceClient is the client API for SearchService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SearchServiceClient interface {
-	Search(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*SearchResponse, error)
+	SearchTickets(ctx context.Context, in *SearchTicketsRequest, opts ...grpc.CallOption) (*SearchTicketsResponse, error)
+	SearchSessions(ctx context.Context, in *SearchSessionsRequest, opts ...grpc.CallOption) (*SearchSessionsResponse, error)
+	SearchOperators(ctx context.Context, in *SearchOperatorsRequest, opts ...grpc.CallOption) (*SearchOperatorsResponse, error)
 	IndexTicket(ctx context.Context, in *IndexTicketRequest, opts ...grpc.CallOption) (*IndexResponse, error)
 	IndexSession(ctx context.Context, in *IndexSessionRequest, opts ...grpc.CallOption) (*IndexResponse, error)
 	IndexOperator(ctx context.Context, in *IndexOperatorRequest, opts ...grpc.CallOption) (*IndexResponse, error)
@@ -43,10 +47,30 @@ func NewSearchServiceClient(cc grpc.ClientConnInterface) SearchServiceClient {
 	return &searchServiceClient{cc}
 }
 
-func (c *searchServiceClient) Search(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*SearchResponse, error) {
+func (c *searchServiceClient) SearchTickets(ctx context.Context, in *SearchTicketsRequest, opts ...grpc.CallOption) (*SearchTicketsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SearchResponse)
-	err := c.cc.Invoke(ctx, SearchService_Search_FullMethodName, in, out, cOpts...)
+	out := new(SearchTicketsResponse)
+	err := c.cc.Invoke(ctx, SearchService_SearchTickets_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *searchServiceClient) SearchSessions(ctx context.Context, in *SearchSessionsRequest, opts ...grpc.CallOption) (*SearchSessionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SearchSessionsResponse)
+	err := c.cc.Invoke(ctx, SearchService_SearchSessions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *searchServiceClient) SearchOperators(ctx context.Context, in *SearchOperatorsRequest, opts ...grpc.CallOption) (*SearchOperatorsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SearchOperatorsResponse)
+	err := c.cc.Invoke(ctx, SearchService_SearchOperators_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +111,9 @@ func (c *searchServiceClient) IndexOperator(ctx context.Context, in *IndexOperat
 // All implementations must embed UnimplementedSearchServiceServer
 // for forward compatibility.
 type SearchServiceServer interface {
-	Search(context.Context, *SearchRequest) (*SearchResponse, error)
+	SearchTickets(context.Context, *SearchTicketsRequest) (*SearchTicketsResponse, error)
+	SearchSessions(context.Context, *SearchSessionsRequest) (*SearchSessionsResponse, error)
+	SearchOperators(context.Context, *SearchOperatorsRequest) (*SearchOperatorsResponse, error)
 	IndexTicket(context.Context, *IndexTicketRequest) (*IndexResponse, error)
 	IndexSession(context.Context, *IndexSessionRequest) (*IndexResponse, error)
 	IndexOperator(context.Context, *IndexOperatorRequest) (*IndexResponse, error)
@@ -101,8 +127,14 @@ type SearchServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedSearchServiceServer struct{}
 
-func (UnimplementedSearchServiceServer) Search(context.Context, *SearchRequest) (*SearchResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Search not implemented")
+func (UnimplementedSearchServiceServer) SearchTickets(context.Context, *SearchTicketsRequest) (*SearchTicketsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SearchTickets not implemented")
+}
+func (UnimplementedSearchServiceServer) SearchSessions(context.Context, *SearchSessionsRequest) (*SearchSessionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SearchSessions not implemented")
+}
+func (UnimplementedSearchServiceServer) SearchOperators(context.Context, *SearchOperatorsRequest) (*SearchOperatorsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SearchOperators not implemented")
 }
 func (UnimplementedSearchServiceServer) IndexTicket(context.Context, *IndexTicketRequest) (*IndexResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method IndexTicket not implemented")
@@ -134,20 +166,56 @@ func RegisterSearchServiceServer(s grpc.ServiceRegistrar, srv SearchServiceServe
 	s.RegisterService(&SearchService_ServiceDesc, srv)
 }
 
-func _SearchService_Search_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchRequest)
+func _SearchService_SearchTickets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchTicketsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SearchServiceServer).Search(ctx, in)
+		return srv.(SearchServiceServer).SearchTickets(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: SearchService_Search_FullMethodName,
+		FullMethod: SearchService_SearchTickets_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SearchServiceServer).Search(ctx, req.(*SearchRequest))
+		return srv.(SearchServiceServer).SearchTickets(ctx, req.(*SearchTicketsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SearchService_SearchSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchSessionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SearchServiceServer).SearchSessions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SearchService_SearchSessions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SearchServiceServer).SearchSessions(ctx, req.(*SearchSessionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SearchService_SearchOperators_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchOperatorsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SearchServiceServer).SearchOperators(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SearchService_SearchOperators_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SearchServiceServer).SearchOperators(ctx, req.(*SearchOperatorsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -214,8 +282,16 @@ var SearchService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*SearchServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Search",
-			Handler:    _SearchService_Search_Handler,
+			MethodName: "SearchTickets",
+			Handler:    _SearchService_SearchTickets_Handler,
+		},
+		{
+			MethodName: "SearchSessions",
+			Handler:    _SearchService_SearchSessions_Handler,
+		},
+		{
+			MethodName: "SearchOperators",
+			Handler:    _SearchService_SearchOperators_Handler,
 		},
 		{
 			MethodName: "IndexTicket",

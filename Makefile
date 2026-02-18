@@ -1,4 +1,4 @@
-.PHONY: help build run run-dev migrate clean tidy vet fmt health-check proto proto-build proto-generate proto-generate-local proto-generate-docker proto-openapi install-deps update docker-build docker-compose-up docker-compose-down
+.PHONY: help build run run-dev worker migrate clean tidy vet fmt health-check proto proto-build proto-generate proto-generate-local proto-generate-docker proto-openapi install-deps update docker-build docker-compose-up docker-compose-down
 
 APP_NAME = search-service
 CMD_PATH = ./cmd/search-service
@@ -14,7 +14,9 @@ OPENAPI_OUT = api
 
 help:
 	@echo "search-service"
-	@echo "  make build run run-dev migrate clean tidy vet fmt health-check docker-build docker-compose-up"
+	@echo "  make build run run-dev worker migrate clean tidy vet fmt health-check docker-build docker-compose-up"
+	@echo "  make api / run   - HTTP + gRPC server"
+	@echo "  make worker      - Kafka consumer (index events into Elasticsearch); deploy separately"
 	@echo "  make proto / proto-generate / proto-openapi  - as in user-service"
 	@echo "  make install-deps / update"
 	@echo "  Port: $(PORT)  Health: http://localhost:$(PORT)/health  Swagger: http://localhost:$(PORT)/swagger"
@@ -29,6 +31,9 @@ run: build
 
 run-dev:
 	go run $(CMD_PATH) api
+
+worker: build
+	@cd $(BIN_DIR) && ./$(APP_NAME) worker
 
 migrate: build
 	@cd $(BIN_DIR) && ./$(APP_NAME) migrate up

@@ -16,49 +16,6 @@
     "application/json"
   ],
   "paths": {
-    "/search": {
-      "get": {
-        "operationId": "SearchService_Search",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/search_serviceSearchResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "q",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "type",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "SearchService"
-        ]
-      }
-    },
     "/search/index/operator": {
       "post": {
         "operationId": "SearchService_IndexOperator",
@@ -148,6 +105,196 @@
             "schema": {
               "$ref": "#/definitions/search_serviceIndexTicketRequest"
             }
+          }
+        ],
+        "tags": [
+          "SearchService"
+        ]
+      }
+    },
+    "/search/operators": {
+      "get": {
+        "operationId": "SearchService_SearchOperators",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/search_serviceSearchOperatorsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "region",
+            "description": "опционально: фильтр по region",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "description": "опционально: фильтр по role (operator, supervisor, admin)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "displayName",
+            "description": "опционально: фильтр по display_name (точное совпадение)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "description": "опционально: лимит результатов (по умолчанию 20, максимум 100)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "offset",
+            "description": "опционально: смещение для пагинации (по умолчанию 0)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "SearchService"
+        ]
+      }
+    },
+    "/search/sessions": {
+      "get": {
+        "operationId": "SearchService_SearchSessions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/search_serviceSearchSessionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "status",
+            "description": "опционально: фильтр по status (waiting, active, finished)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "clientId",
+            "description": "опционально: фильтр по client_id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "pin",
+            "description": "опционально: фильтр по pin",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "description": "опционально: лимит результатов (по умолчанию 20, максимум 100)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "offset",
+            "description": "опционально: смещение для пагинации (по умолчанию 0)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "SearchService"
+        ]
+      }
+    },
+    "/search/tickets": {
+      "get": {
+        "operationId": "SearchService_SearchTickets",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/search_serviceSearchTicketsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "status",
+            "description": "опционально: фильтр по status",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "sessionId",
+            "description": "опционально: фильтр по session_id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "clientId",
+            "description": "опционально: фильтр по client_id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "operatorId",
+            "description": "опционально: фильтр по operator_id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "description": "опционально: лимит результатов (по умолчанию 20, максимум 100)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "offset",
+            "description": "опционально: смещение для пагинации (по умолчанию 0)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
           }
         ],
         "tags": [
@@ -271,7 +418,49 @@
         }
       }
     },
-    "search_serviceSearchResponse": {
+    "search_serviceSearchOperatorsResponse": {
+      "type": "object",
+      "properties": {
+        "operators": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/search_serviceOperatorHit"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64",
+          "title": "общее количество результатов"
+        },
+        "hasMore": {
+          "type": "boolean",
+          "title": "есть ли ещё результаты"
+        }
+      }
+    },
+    "search_serviceSearchSessionsResponse": {
+      "type": "object",
+      "properties": {
+        "sessions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/search_serviceSessionHit"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64",
+          "title": "общее количество результатов"
+        },
+        "hasMore": {
+          "type": "boolean",
+          "title": "есть ли ещё результаты"
+        }
+      }
+    },
+    "search_serviceSearchTicketsResponse": {
       "type": "object",
       "properties": {
         "tickets": {
@@ -281,19 +470,14 @@
             "$ref": "#/definitions/search_serviceTicketHit"
           }
         },
-        "sessions": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/search_serviceSessionHit"
-          }
+        "total": {
+          "type": "string",
+          "format": "int64",
+          "title": "общее количество результатов"
         },
-        "operators": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/search_serviceOperatorHit"
-          }
+        "hasMore": {
+          "type": "boolean",
+          "title": "есть ли ещё результаты"
         }
       }
     },

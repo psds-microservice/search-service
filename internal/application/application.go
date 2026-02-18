@@ -52,10 +52,11 @@ func serveOpenAPISpec() http.HandlerFunc {
 
 // API приложение: HTTP + gRPC серверы (режим api).
 type API struct {
-	cfg     *config.Config
-	httpSrv *http.Server
-	grpcSrv *grpc.Server
-	lis     net.Listener
+	cfg       *config.Config
+	httpSrv   *http.Server
+	grpcSrv   *grpc.Server
+	lis       net.Listener
+	searchSvc service.SearchServicer
 }
 
 // NewAPI создаёт приложение для режима api.
@@ -109,10 +110,11 @@ func NewAPI(cfg *config.Config) (*API, error) {
 	}
 
 	return &API{
-		cfg:     cfg,
-		httpSrv: httpSrv,
-		grpcSrv: grpcSrv,
-		lis:     lis,
+		cfg:       cfg,
+		httpSrv:   httpSrv,
+		grpcSrv:   grpcSrv,
+		lis:       lis,
+		searchSvc: searchSvc,
 	}, nil
 }
 

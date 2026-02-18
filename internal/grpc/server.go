@@ -36,59 +36,125 @@ func (s *Server) mapError(err error) error {
 	return status.Error(codes.Internal, err.Error())
 }
 
-func toProtoSearchResponse(result *service.SearchResult) *search_service.SearchResponse {
-	if result == nil {
-		return &search_service.SearchResponse{}
+func (s *Server) SearchTickets(ctx context.Context, req *search_service.SearchTicketsRequest) (*search_service.SearchTicketsResponse, error) {
+	limit := int(req.GetLimit())
+	if err := s.Validator.ValidateSearchLimit(limit); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	tickets := make([]*search_service.TicketHit, len(result.Tickets))
+	offset := int(req.GetOffset())
+	if err := s.Validator.ValidateSearchOffset(offset); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	filters := &service.TicketFilters{
+		Status:     req.GetStatus(),
+		SessionID:  req.GetSessionId(),
+		ClientID:   req.GetClientId(),
+		OperatorID: req.GetOperatorId(),
+		Limit:      limit,
+		Offset:     offset,
+	}
+
+	result, err := s.SearchSvc.SearchTickets(ctx, filters)
+	if err != nil {
+		return nil, s.mapError(err)
+	}
+
+	ticketHits := make([]*search_service.TicketHit, len(result.Tickets))
 	for i, t := range result.Tickets {
-		tickets[i] = &search_service.TicketHit{
+		ticketHits[i] = &search_service.TicketHit{
 			TicketId:  t.TicketID,
 			SessionId: t.SessionID,
 			Subject:   t.Subject,
 			Snippet:   t.Snippet,
 		}
 	}
-	sessions := make([]*search_service.SessionHit, len(result.Sessions))
-	for i, s := range result.Sessions {
-		sessions[i] = &search_service.SessionHit{
-			SessionId: s.SessionID,
-			Pin:       s.PIN,
-			Status:    s.Status,
-			Snippet:   s.Snippet,
-		}
-	}
-	operators := make([]*search_service.OperatorHit, len(result.Operators))
-	for i, o := range result.Operators {
-		operators[i] = &search_service.OperatorHit{
-			UserId:      o.UserID,
-			DisplayName: o.DisplayName,
-			Region:      o.Region,
-			Snippet:     o.Snippet,
-		}
-	}
-	return &search_service.SearchResponse{
-		Tickets:   tickets,
-		Sessions:  sessions,
-		Operators: operators,
-	}
+
+	return &search_service.SearchTicketsResponse{
+		Tickets: ticketHits,
+		Total:   result.Total,
+		HasMore: result.HasMore,
+	}, nil
 }
 
-func (s *Server) Search(ctx context.Context, req *search_service.SearchRequest) (*search_service.SearchResponse, error) {
-	q := req.GetQ()
-	typeFilter := req.GetType()
+func (s *Server) SearchSessions(ctx context.Context, req *search_service.SearchSessionsRequest) (*search_service.SearchSessionsResponse, error) {
 	limit := int(req.GetLimit())
-
-	if err := s.Validator.ValidateSearchQuery(q, typeFilter, limit); err != nil {
+	if err := s.Validator.ValidateSearchLimit(limit); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	offset := int(req.GetOffset())
+	if err := s.Validator.ValidateSearchOffset(offset); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	result, err := s.SearchSvc.Search(ctx, q, typeFilter, limit)
+	filters := &service.SessionFilters{
+		Status:   req.GetStatus(),
+		ClientID: req.GetClientId(),
+		PIN:      req.GetPin(),
+		Limit:    limit,
+		Offset:   offset,
+	}
+
+	result, err := s.SearchSvc.SearchSessions(ctx, filters)
 	if err != nil {
 		return nil, s.mapError(err)
 	}
 
-	return toProtoSearchResponse(result), nil
+	sessionHits := make([]*search_service.SessionHit, len(result.Sessions))
+	for i, ses := range result.Sessions {
+		sessionHits[i] = &search_service.SessionHit{
+			SessionId: ses.SessionID,
+			Pin:       ses.PIN,
+			Status:    ses.Status,
+			Snippet:   ses.Snippet,
+		}
+	}
+
+	return &search_service.SearchSessionsResponse{
+		Sessions: sessionHits,
+		Total:    result.Total,
+		HasMore:  result.HasMore,
+	}, nil
+}
+
+func (s *Server) SearchOperators(ctx context.Context, req *search_service.SearchOperatorsRequest) (*search_service.SearchOperatorsResponse, error) {
+	limit := int(req.GetLimit())
+	if err := s.Validator.ValidateSearchLimit(limit); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	offset := int(req.GetOffset())
+	if err := s.Validator.ValidateSearchOffset(offset); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	filters := &service.OperatorFilters{
+		Region:      req.GetRegion(),
+		Role:        req.GetRole(),
+		DisplayName: req.GetDisplayName(),
+		Limit:       limit,
+		Offset:      offset,
+	}
+
+	result, err := s.SearchSvc.SearchOperators(ctx, filters)
+	if err != nil {
+		return nil, s.mapError(err)
+	}
+
+	operatorHits := make([]*search_service.OperatorHit, len(result.Operators))
+	for i, op := range result.Operators {
+		operatorHits[i] = &search_service.OperatorHit{
+			UserId:      op.UserID,
+			DisplayName: op.DisplayName,
+			Region:      op.Region,
+			Snippet:     op.Snippet,
+		}
+	}
+
+	return &search_service.SearchOperatorsResponse{
+		Operators: operatorHits,
+		Total:     result.Total,
+		HasMore:   result.HasMore,
+	}, nil
 }
 
 func (s *Server) IndexTicket(ctx context.Context, req *search_service.IndexTicketRequest) (*search_service.IndexResponse, error) {

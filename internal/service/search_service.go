@@ -10,10 +10,55 @@ import (
 
 // SearchServicer — интерфейс для gRPC Deps (Dependency Inversion).
 type SearchServicer interface {
-	Search(ctx context.Context, q string, typeFilter string, limit int) (*SearchResult, error)
+	SearchTickets(ctx context.Context, filters *TicketFilters) (*TicketsSearchResult, error)
+	SearchSessions(ctx context.Context, filters *SessionFilters) (*SessionsSearchResult, error)
+	SearchOperators(ctx context.Context, filters *OperatorFilters) (*OperatorsSearchResult, error)
 	IndexTicket(ctx context.Context, in *IndexTicketInput) error
 	IndexSession(ctx context.Context, in *IndexSessionInput) error
 	IndexOperator(ctx context.Context, in *IndexOperatorInput) error
+}
+
+type TicketsSearchResult struct {
+	Tickets []TicketHit
+	Total   int64
+	HasMore bool
+}
+
+type SessionsSearchResult struct {
+	Sessions []SessionHit
+	Total    int64
+	HasMore  bool
+}
+
+type OperatorsSearchResult struct {
+	Operators []OperatorHit
+	Total     int64
+	HasMore   bool
+}
+
+type TicketFilters struct {
+	Status     string // фильтр по status
+	SessionID  string // фильтр по session_id
+	ClientID   string // фильтр по client_id
+	OperatorID string // фильтр по operator_id
+	Limit      int    // лимит результатов (по умолчанию 20)
+	Offset     int    // смещение для пагинации (по умолчанию 0)
+}
+
+type SessionFilters struct {
+	Status   string // фильтр по status
+	ClientID string // фильтр по client_id
+	PIN      string // фильтр по pin
+	Limit    int    // лимит результатов (по умолчанию 20)
+	Offset   int    // смещение для пагинации (по умолчанию 0)
+}
+
+type OperatorFilters struct {
+	Region      string // фильтр по region
+	Role        string // фильтр по role
+	DisplayName string // фильтр по display_name (точное совпадение)
+	Limit       int    // лимит результатов (по умолчанию 20)
+	Offset      int    // смещение для пагинации (по умолчанию 0)
 }
 
 const (
@@ -149,12 +194,6 @@ func (s *SearchService) IndexOperator(ctx context.Context, in *IndexOperatorInpu
 	return s.es.IndexDocument(ctx, indexOperators, in.UserID, doc)
 }
 
-type SearchResult struct {
-	Tickets   []TicketHit   `json:"tickets"`
-	Sessions  []SessionHit  `json:"sessions"`
-	Operators []OperatorHit `json:"operators"`
-}
-
 type TicketHit struct {
 	TicketID  int64  `json:"ticket_id"`
 	SessionID string `json:"session_id"`
@@ -176,63 +215,8 @@ type OperatorHit struct {
 	Snippet     string `json:"snippet,omitempty"`
 }
 
-func (s *SearchService) Search(ctx context.Context, q string, typeFilter string, limit int) (*SearchResult, error) {
-	if limit <= 0 {
-		limit = 20
-	}
-	q = strings.TrimSpace(q)
-	if q == "" {
-		return &SearchResult{
-			Tickets:   []TicketHit{},
-			Sessions:  []SessionHit{},
-			Operators: []OperatorHit{},
-		}, nil
-	}
-
-	result := &SearchResult{
-		Tickets:   []TicketHit{},
-		Sessions:  []SessionHit{},
-		Operators: []OperatorHit{},
-	}
-
-	// Multi-match query for text fields
-	query := map[string]interface{}{
-		"multi_match": map[string]interface{}{
-			"query":  q,
-			"fields": []string{"*"},
-			"type":   "best_fields",
-		},
-	}
-
-	if typeFilter == "" || typeFilter == "tickets" {
-		tickets, err := s.searchTickets(ctx, query, limit)
-		if err != nil {
-			return nil, fmt.Errorf("tickets: %w", err)
-		}
-		result.Tickets = tickets
-	}
-
-	if typeFilter == "" || typeFilter == "sessions" {
-		sessions, err := s.searchSessions(ctx, query, limit)
-		if err != nil {
-			return nil, fmt.Errorf("sessions: %w", err)
-		}
-		result.Sessions = sessions
-	}
-
-	if typeFilter == "" || typeFilter == "operators" {
-		operators, err := s.searchOperators(ctx, query, limit)
-		if err != nil {
-			return nil, fmt.Errorf("operators: %w", err)
-		}
-		result.Operators = operators
-	}
-
-	return result, nil
-}
-
-func (s *SearchService) searchTickets(ctx context.Context, query map[string]interface{}, limit int) ([]TicketHit, error) {
-	resp, err := s.es.Search(ctx, indexTickets, query, limit)
+func (s *SearchService) searchTickets(ctx context.Context, query map[string]interface{}, limit int, offset int) (*TicketsSearchResult, error) {
+	resp, err := s.es.Search(ctx, indexTickets, query, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -252,11 +236,19 @@ func (s *SearchService) searchTickets(ctx context.Context, query map[string]inte
 		}
 		hits = append(hits, h)
 	}
-	return hits, nil
+
+	total := resp.Hits.Total.Value
+	hasMore := int64(offset+len(hits)) < total
+
+	return &TicketsSearchResult{
+		Tickets: hits,
+		Total:   total,
+		HasMore: hasMore,
+	}, nil
 }
 
-func (s *SearchService) searchSessions(ctx context.Context, query map[string]interface{}, limit int) ([]SessionHit, error) {
-	resp, err := s.es.Search(ctx, indexSessions, query, limit)
+func (s *SearchService) searchSessions(ctx context.Context, query map[string]interface{}, limit int, offset int) (*SessionsSearchResult, error) {
+	resp, err := s.es.Search(ctx, indexSessions, query, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -276,11 +268,19 @@ func (s *SearchService) searchSessions(ctx context.Context, query map[string]int
 		}
 		hits = append(hits, h)
 	}
-	return hits, nil
+
+	total := resp.Hits.Total.Value
+	hasMore := int64(offset+len(hits)) < total
+
+	return &SessionsSearchResult{
+		Sessions: hits,
+		Total:    total,
+		HasMore:  hasMore,
+	}, nil
 }
 
-func (s *SearchService) searchOperators(ctx context.Context, query map[string]interface{}, limit int) ([]OperatorHit, error) {
-	resp, err := s.es.Search(ctx, indexOperators, query, limit)
+func (s *SearchService) searchOperators(ctx context.Context, query map[string]interface{}, limit int, offset int) (*OperatorsSearchResult, error) {
+	resp, err := s.es.Search(ctx, indexOperators, query, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -300,5 +300,171 @@ func (s *SearchService) searchOperators(ctx context.Context, query map[string]in
 		}
 		hits = append(hits, h)
 	}
-	return hits, nil
+
+	total := resp.Hits.Total.Value
+	hasMore := int64(offset+len(hits)) < total
+
+	return &OperatorsSearchResult{
+		Operators: hits,
+		Total:     total,
+		HasMore:   hasMore,
+	}, nil
+}
+
+func (s *SearchService) SearchTickets(ctx context.Context, filters *TicketFilters) (*TicketsSearchResult, error) {
+	if filters == nil {
+		filters = &TicketFilters{}
+	}
+	limit := filters.Limit
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	offset := filters.Offset
+	if offset < 0 {
+		offset = 0
+	}
+
+	query := s.buildTicketQuery(filters)
+	return s.searchTickets(ctx, query, limit, offset)
+}
+
+func (s *SearchService) SearchSessions(ctx context.Context, filters *SessionFilters) (*SessionsSearchResult, error) {
+	if filters == nil {
+		filters = &SessionFilters{}
+	}
+	limit := filters.Limit
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	offset := filters.Offset
+	if offset < 0 {
+		offset = 0
+	}
+
+	query := s.buildSessionQuery(filters)
+	return s.searchSessions(ctx, query, limit, offset)
+}
+
+func (s *SearchService) SearchOperators(ctx context.Context, filters *OperatorFilters) (*OperatorsSearchResult, error) {
+	if filters == nil {
+		filters = &OperatorFilters{}
+	}
+	limit := filters.Limit
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	offset := filters.Offset
+	if offset < 0 {
+		offset = 0
+	}
+
+	query := s.buildOperatorQuery(filters)
+	return s.searchOperators(ctx, query, limit, offset)
+}
+
+func (s *SearchService) buildTicketQuery(filters *TicketFilters) map[string]interface{} {
+	var filter []map[string]interface{}
+
+	// Точные фильтры
+	if filters.Status != "" {
+		filter = append(filter, map[string]interface{}{
+			"term": map[string]interface{}{"status": filters.Status},
+		})
+	}
+	if filters.SessionID != "" {
+		filter = append(filter, map[string]interface{}{
+			"term": map[string]interface{}{"session_id": filters.SessionID},
+		})
+	}
+	if filters.ClientID != "" {
+		filter = append(filter, map[string]interface{}{
+			"term": map[string]interface{}{"client_id": filters.ClientID},
+		})
+	}
+	if filters.OperatorID != "" {
+		filter = append(filter, map[string]interface{}{
+			"term": map[string]interface{}{"operator_id": filters.OperatorID},
+		})
+	}
+
+	if len(filter) == 0 {
+		return map[string]interface{}{"match_all": map[string]interface{}{}}
+	}
+
+	return map[string]interface{}{
+		"bool": map[string]interface{}{
+			"filter": filter,
+		},
+	}
+}
+
+func (s *SearchService) buildSessionQuery(filters *SessionFilters) map[string]interface{} {
+	var filter []map[string]interface{}
+
+	// Точные фильтры
+	if filters.Status != "" {
+		filter = append(filter, map[string]interface{}{
+			"term": map[string]interface{}{"status": filters.Status},
+		})
+	}
+	if filters.ClientID != "" {
+		filter = append(filter, map[string]interface{}{
+			"term": map[string]interface{}{"client_id": filters.ClientID},
+		})
+	}
+	if filters.PIN != "" {
+		filter = append(filter, map[string]interface{}{
+			"term": map[string]interface{}{"pin": filters.PIN},
+		})
+	}
+
+	if len(filter) == 0 {
+		return map[string]interface{}{"match_all": map[string]interface{}{}}
+	}
+
+	return map[string]interface{}{
+		"bool": map[string]interface{}{
+			"filter": filter,
+		},
+	}
+}
+
+func (s *SearchService) buildOperatorQuery(filters *OperatorFilters) map[string]interface{} {
+	var filter []map[string]interface{}
+
+	// Точные фильтры
+	if filters.Region != "" {
+		filter = append(filter, map[string]interface{}{
+			"term": map[string]interface{}{"region": filters.Region},
+		})
+	}
+	if filters.Role != "" {
+		filter = append(filter, map[string]interface{}{
+			"term": map[string]interface{}{"role": filters.Role},
+		})
+	}
+	if filters.DisplayName != "" {
+		filter = append(filter, map[string]interface{}{
+			"term": map[string]interface{}{"display_name": filters.DisplayName},
+		})
+	}
+
+	if len(filter) == 0 {
+		return map[string]interface{}{"match_all": map[string]interface{}{}}
+	}
+
+	return map[string]interface{}{
+		"bool": map[string]interface{}{
+			"filter": filter,
+		},
+	}
 }
