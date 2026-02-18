@@ -42,7 +42,7 @@ func Load() (*Config, error) {
 	}
 	cfg.KafkaBrokers = kafkaBrokers
 	cfg.KafkaGroupID = getEnv("KAFKA_GROUP_ID", "search-service")
-	topicsStr := getEnv("KAFKA_TOPICS", "psds.session.events,psds.session.created,psds.session.ended,psds.session.operator_joined,psds.operator.assigned,psds.operator.created,psds.operator.updated")
+	topicsStr := getEnv("KAFKA_TOPICS", "psds.session.events,psds.session.created,psds.session.ended,psds.session.operator_joined,psds.operator.assigned,psds.operator.created,psds.operator.updated,psds.ticket.events")
 	var kafkaTopics []string
 	if topicsStr != "" {
 		for _, t := range strings.Split(topicsStr, ",") {

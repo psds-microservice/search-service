@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/psds-microservice/search-service/internal/elasticsearch"
 )
@@ -85,52 +84,13 @@ func NewSearchService(esURL string) (*SearchService, error) {
 }
 
 func (s *SearchService) ensureIndices(ctx context.Context) error {
-	// Tickets index mapping
-	ticketsMapping := map[string]interface{}{
-		"mappings": map[string]interface{}{
-			"properties": map[string]interface{}{
-				"ticket_id":   map[string]interface{}{"type": "long"},
-				"session_id":  map[string]interface{}{"type": "keyword"},
-				"client_id":   map[string]interface{}{"type": "keyword"},
-				"operator_id": map[string]interface{}{"type": "keyword"},
-				"subject":     map[string]interface{}{"type": "text"},
-				"notes":       map[string]interface{}{"type": "text"},
-				"status":      map[string]interface{}{"type": "keyword"},
-			},
-		},
-	}
-
-	// Sessions index mapping
-	sessionsMapping := map[string]interface{}{
-		"mappings": map[string]interface{}{
-			"properties": map[string]interface{}{
-				"session_id": map[string]interface{}{"type": "keyword"},
-				"client_id":  map[string]interface{}{"type": "keyword"},
-				"pin":        map[string]interface{}{"type": "keyword"},
-				"status":     map[string]interface{}{"type": "keyword"},
-			},
-		},
-	}
-
-	// Operators index mapping
-	operatorsMapping := map[string]interface{}{
-		"mappings": map[string]interface{}{
-			"properties": map[string]interface{}{
-				"user_id":      map[string]interface{}{"type": "keyword"},
-				"display_name": map[string]interface{}{"type": "text"},
-				"region":       map[string]interface{}{"type": "keyword"},
-				"role":         map[string]interface{}{"type": "keyword"},
-			},
-		},
-	}
-
-	if err := s.es.EnsureIndex(ctx, indexTickets, ticketsMapping); err != nil {
+	if err := s.es.EnsureIndex(ctx, indexTickets, elasticsearch.TicketsMapping()); err != nil {
 		return fmt.Errorf("ensure tickets index: %w", err)
 	}
-	if err := s.es.EnsureIndex(ctx, indexSessions, sessionsMapping); err != nil {
+	if err := s.es.EnsureIndex(ctx, indexSessions, elasticsearch.SessionsMapping()); err != nil {
 		return fmt.Errorf("ensure sessions index: %w", err)
 	}
-	if err := s.es.EnsureIndex(ctx, indexOperators, operatorsMapping); err != nil {
+	if err := s.es.EnsureIndex(ctx, indexOperators, elasticsearch.OperatorsMapping()); err != nil {
 		return fmt.Errorf("ensure operators index: %w", err)
 	}
 

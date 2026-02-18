@@ -1,9 +1,12 @@
-.PHONY: help build run run-dev worker migrate clean tidy vet fmt health-check proto proto-build proto-generate proto-generate-local proto-generate-docker proto-openapi install-deps update docker-build docker-compose-up docker-compose-down
+.PHONY: help build run run-dev worker migrate clean tidy vet fmt health-check proto proto-build proto-generate proto-generate-local proto-generate-docker proto-openapi install-deps update docker-build docker-compose-up docker-compose-down clean-indices clean-indices-tickets clean-indices-sessions clean-indices-operators
 
 APP_NAME = search-service
 CMD_PATH = ./cmd/search-service
 BIN_DIR = bin
 PORT = 8096
+# URL Elasticsearch для clean-indices (переопредели: make clean-indices ES_URL=http://host:9200)
+ES_URL ?= http://localhost:9200
+ES_INDICES = tickets sessions operators
 PROTOC_IMAGE = local/protoc-go:latest
 PROTO_ROOT = pkg/search_service
 PROTO_FILE = search.proto
@@ -16,7 +19,9 @@ help:
 	@echo "search-service"
 	@echo "  make build run run-dev worker migrate clean tidy vet fmt health-check docker-build docker-compose-up"
 	@echo "  make api / run   - HTTP + gRPC server"
-	@echo "  make worker      - Kafka consumer (index events into Elasticsearch); deploy separately"
+	@echo "  make worker     - Kafka consumer (index events into Elasticsearch); deploy separately"
+	@echo "  make clean-indices        - удалить индексы ES (tickets, sessions, operators); ES_URL=http://localhost:9200"
+	@echo "  make clean-indices-tickets / clean-indices-sessions / clean-indices-operators  - удалить один индекс"
 	@echo "  make proto / proto-generate / proto-openapi  - as in user-service"
 	@echo "  make install-deps / update"
 	@echo "  Port: $(PORT)  Health: http://localhost:$(PORT)/health  Swagger: http://localhost:$(PORT)/swagger"
@@ -50,6 +55,23 @@ fmt:
 clean:
 	rm -rf $(BIN_DIR)
 	go clean
+
+# Очистка индексов Elasticsearch (после смены маппинга: make clean-indices, затем перезапуск api/worker и reindex-search в сервисах)
+clean-indices:
+	@echo "Deleting ES indices at $(ES_URL)..."
+	@curl -s -X DELETE "$(ES_URL)/tickets" && echo "  Deleted tickets" || true
+	@curl -s -X DELETE "$(ES_URL)/sessions" && echo "  Deleted sessions" || true
+	@curl -s -X DELETE "$(ES_URL)/operators" && echo "  Deleted operators" || true
+	@echo "Done. Restart search-service (api/worker) and run make reindex-search in ticket/session-manager/operator-directory."
+
+clean-indices-tickets:
+	@curl -s -X DELETE "$(ES_URL)/tickets" && echo "Deleted tickets" || true
+
+clean-indices-sessions:
+	@curl -s -X DELETE "$(ES_URL)/sessions" && echo "Deleted sessions" || true
+
+clean-indices-operators:
+	@curl -s -X DELETE "$(ES_URL)/operators" && echo "Deleted operators" || true
 
 tidy:
 	go mod tidy
