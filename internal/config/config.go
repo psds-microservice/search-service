@@ -24,7 +24,7 @@ type Config struct {
 func Load() (*Config, error) {
 	cfg := &Config{
 		AppHost:  getEnv("APP_HOST", "0.0.0.0"),
-		HTTPPort: firstEnv("APP_PORT", "HTTP_PORT", "8096"),
+		HTTPPort: firstEnv("APP_PORT", "HTTP_PORT", "8099"),
 		GRPCPort: firstEnv("GRPC_PORT", "METRICS_PORT", "9096"),
 		LogLevel: getEnv("LOG_LEVEL", "info"),
 	}

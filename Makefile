@@ -3,7 +3,7 @@
 APP_NAME = search-service
 CMD_PATH = ./cmd/search-service
 BIN_DIR = bin
-PORT = 8096
+PORT = 8099
 # URL Elasticsearch для clean-indices (переопредели: make clean-indices ES_URL=http://host:9200)
 ES_URL ?= http://localhost:9200
 ES_INDICES = tickets sessions operators
