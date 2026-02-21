@@ -13,7 +13,10 @@ type Config struct {
 	LogLevel string
 
 	Elasticsearch struct {
-		URL string
+		URL                string
+		InsecureSkipVerify bool   // skip TLS cert verification (dev only)
+		Username           string // Basic auth (optional)
+		Password           string
 	}
 
 	KafkaBrokers []string
@@ -29,6 +32,9 @@ func Load() (*Config, error) {
 		LogLevel: getEnv("LOG_LEVEL", "info"),
 	}
 	cfg.Elasticsearch.URL = getEnv("ELASTICSEARCH_URL", "http://localhost:9200")
+	cfg.Elasticsearch.InsecureSkipVerify = parseBool(getEnv("ELASTICSEARCH_INSECURE_SKIP_VERIFY", "false"))
+	cfg.Elasticsearch.Username = getEnv("ELASTICSEARCH_USERNAME", "")
+	cfg.Elasticsearch.Password = getEnv("ELASTICSEARCH_PASSWORD", "")
 
 	// Kafka config
 	brokersStr := getEnv("KAFKA_BROKERS", "")
@@ -86,4 +92,12 @@ func getEnv(key, def string) string {
 		return v
 	}
 	return def
+}
+
+func parseBool(s string) bool {
+	switch strings.ToLower(strings.TrimSpace(s)) {
+	case "1", "true", "yes", "on":
+		return true
+	}
+	return false
 }

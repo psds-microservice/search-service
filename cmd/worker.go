@@ -39,7 +39,7 @@ func runWorker(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("worker requires KAFKA_BROKERS and KAFKA_TOPICS")
 	}
 
-	searchSvc, err := service.NewSearchService(cfg.Elasticsearch.URL)
+	searchSvc, err := service.NewSearchService(cfg.Elasticsearch.URL, cfg.Elasticsearch.InsecureSkipVerify, cfg.Elasticsearch.Username, cfg.Elasticsearch.Password)
 	if err != nil {
 		return fmt.Errorf("search service: %w", err)
 	}

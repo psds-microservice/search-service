@@ -2,6 +2,8 @@ package elasticsearch
 
 import (
 	"context"
+	"crypto/tls"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -15,12 +17,34 @@ type Client struct {
 	http    *http.Client
 }
 
-// NewClient creates a new Elasticsearch client
-func NewClient(baseURL string) *Client {
+// NewClient creates a new Elasticsearch client. skipTLSVerify disables TLS cert verification (dev only).
+// username/password enable HTTP Basic auth when username is non-empty.
+func NewClient(baseURL string, skipTLSVerify bool, username, password string) *Client {
+	var transport http.RoundTripper = http.DefaultTransport
+	if skipTLSVerify {
+		t := http.DefaultTransport.(*http.Transport).Clone()
+		t.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		transport = t
+	}
+	if username != "" {
+		transport = &basicAuthTransport{base: transport, username: username, password: password}
+	}
 	return &Client{
 		baseURL: strings.TrimSuffix(baseURL, "/"),
-		http:    &http.Client{},
+		http:    &http.Client{Transport: transport},
 	}
+}
+
+type basicAuthTransport struct {
+	base     http.RoundTripper
+	username string
+	password string
+}
+
+func (t *basicAuthTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	auth := t.username + ":" + t.password
+	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(auth)))
+	return t.base.RoundTrip(req)
 }
 
 // IndexDocument indexes a document in Elasticsearch

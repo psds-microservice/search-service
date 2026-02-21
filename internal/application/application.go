@@ -66,7 +66,7 @@ func NewAPI(cfg *config.Config) (*API, error) {
 		return nil, fmt.Errorf("config: %w", err)
 	}
 
-	searchSvc, err := service.NewSearchService(cfg.Elasticsearch.URL)
+	searchSvc, err := service.NewSearchService(cfg.Elasticsearch.URL, cfg.Elasticsearch.InsecureSkipVerify, cfg.Elasticsearch.Username, cfg.Elasticsearch.Password)
 	if err != nil {
 		return nil, fmt.Errorf("search service: %w", err)
 	}
